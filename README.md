@@ -2,7 +2,7 @@
 
 A scalable, event-driven full-stack application built with React, TypeScript, TanStack Query, and Express. This project demonstrates modern architectural patterns for building scalable applications.
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 ### Backend (Express + TypeScript)
 - **Event-Driven Architecture**: Uses EventEmitter2 for loose coupling between modules
@@ -19,32 +19,32 @@ A scalable, event-driven full-stack application built with React, TypeScript, Ta
 - **Performance**: Optimized with code splitting and lazy loading
 - **Developer Experience**: Hot reloading with Vite
 
-## 🚀 Features
+## Features
 
 ### Backend Features
-- ✅ RESTful API with proper HTTP methods
-- ✅ Event-driven architecture with EventEmitter2
-- ✅ Input validation with Joi schemas
-- ✅ Structured logging with correlation IDs
-- ✅ Error handling and proper HTTP status codes
-- ✅ CORS configuration for frontend integration
-- ✅ Health check endpoint
-- ✅ Request/response tracking
-- ✅ Performance monitoring headers
+- RESTful API with proper HTTP methods
+- Event-driven architecture with EventEmitter2
+- Input validation with Joi schemas
+- Structured logging with correlation IDs
+- Error handling and proper HTTP status codes
+- CORS configuration for frontend integration
+- Health check endpoint
+- Request/response tracking
+- Performance monitoring headers
 
 ### Frontend Features
-- ✅ Modern React with TypeScript
-- ✅ TanStack Query for data fetching and caching
-- ✅ Responsive design with Tailwind CSS
-- ✅ Real-time user statistics
-- ✅ Search, filter, and sort functionality
-- ✅ Pagination support
-- ✅ Create, read, update, delete operations
-- ✅ Bulk user generation
-- ✅ Loading states and error handling
-- ✅ Optimistic updates
+- Modern React with TypeScript
+- TanStack Query for data fetching and caching
+- Responsive design with Tailwind CSS
+- Real-time user statistics
+- Search, filter, and sort functionality
+- Pagination support
+- Create, read, update, delete operations
+- Bulk user generation
+- Loading states and error handling
+- Optimistic updates
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 tanstack-simulation-test/
@@ -77,7 +77,7 @@ tanstack-simulation-test/
 └── README.md
 ```
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 ### Backend
 - **Runtime**: Node.js 18+
@@ -97,7 +97,7 @@ tanstack-simulation-test/
 - **Icons**: Lucide React
 - **HTTP Client**: Axios
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 18+ 
@@ -141,7 +141,7 @@ npm install
 npm run dev
 ```
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### Users
 - `GET /api/v1/users` - Get all users with pagination
@@ -155,7 +155,7 @@ npm run dev
 ### Health Check
 - `GET /health` - Server health status
 
-## 🎯 Key Features
+## Key Features
 
 ### Event-Driven Architecture
 The backend uses an event-driven architecture where:
@@ -176,7 +176,7 @@ The backend uses an event-driven architecture where:
 - **Optimistic Updates**: Immediate UI feedback
 - **Error Boundaries**: Graceful error handling
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -195,7 +195,7 @@ LOG_LEVEL=info
 VITE_API_URL=http://localhost:3001/api/v1
 ```
 
-## 🧪 Testing
+## Testing
 
 ### Backend Tests
 ```bash
@@ -209,7 +209,7 @@ cd frontend
 npm test
 ```
 
-## 📦 Build for Production
+## Build for Production
 
 ### Backend
 ```bash
@@ -225,7 +225,7 @@ npm run build
 npm run preview
 ```
 
-## 🚀 Deployment
+## Deployment
 
 ### Backend Deployment
 1. Build the TypeScript code: `npm run build`
@@ -237,7 +237,7 @@ npm run preview
 2. Deploy the `dist/` folder to your hosting service
 3. Configure API URL for production
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -245,11 +245,11 @@ npm run preview
 4. Add tests if applicable
 5. Submit a pull request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License.
 
-## 🆘 Support
+## Support
 
 For support and questions:
 - Create an issue in the repository
@@ -258,4 +258,4 @@ For support and questions:
 
 ---
 
-**Built with ❤️ using modern web technologies**
+Built with modern web technologies
