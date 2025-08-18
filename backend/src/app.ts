@@ -8,6 +8,7 @@ import { ContextMiddleware } from './middleware/context';
 import { logger } from './services/logger';
 import { eventBus } from './services/eventBus';
 import userRoutes from './routes/userRoutes';
+import authRoutes from './routes/authRoutes';
 
 // Load environment variables
 dotenv.config();
@@ -40,16 +41,16 @@ class App {
     this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
     // Context and performance middleware
-    this.app.use(ContextMiddleware.addContext);
-    this.app.use(ContextMiddleware.addResponseTime);
-    this.app.use(ContextMiddleware.addUserContext);
-    this.app.use(ContextMiddleware.addPerformanceHeaders);
+    this.app.use((req, res, next) => ContextMiddleware.addContext(req, res, next));
+    this.app.use((req, res, next) => ContextMiddleware.addResponseTime(req, res, next));
+    this.app.use((req, res, next) => ContextMiddleware.addUserContext(req, res, next));
+    this.app.use((req, res, next) => ContextMiddleware.addPerformanceHeaders(req, res, next));
 
     // Logging middleware
     this.app.use(morgan('combined', {
       stream: {
         write: (message: string) => {
-          logger.info(message.trim(), { operation: 'http_request' });
+          logger.info(message.trim(), { requestId: 'morgan', operation: 'http_request' });
         }
       }
     }));
@@ -57,7 +58,7 @@ class App {
 
   private initializeRoutes(): void {
     // Health check endpoint
-    this.app.get('/health', (req, res) => {
+    this.app.get('/health', (_req, res) => {
       res.status(200).json({
         status: 'OK',
         timestamp: new Date().toISOString(),
@@ -68,6 +69,7 @@ class App {
     });
 
     // API routes
+    this.app.use(`/api/${API_CONSTANTS.API_VERSION}/auth`, authRoutes);
     this.app.use(`/api/${API_CONSTANTS.API_VERSION}/users`, userRoutes);
 
     // 404 handler
@@ -83,7 +85,7 @@ class App {
 
   private initializeErrorHandling(): void {
     // Global error handler
-    this.app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    this.app.use((error: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
       const statusCode = (error as any).statusCode || 500;
       const message = error.message || 'Internal Server Error';
 
@@ -107,6 +109,7 @@ class App {
     // Subscribe to events for monitoring and logging
     eventBus.subscribeToEvent('user.created', (payload) => {
       logger.info('User created event received', {
+        requestId: 'system',
         eventType: payload.type,
         userId: (payload.data as any)?.id,
         operation: 'event_handling'
@@ -115,6 +118,7 @@ class App {
 
     eventBus.subscribeToEvent('user.updated', (payload) => {
       logger.info('User updated event received', {
+        requestId: 'system',
         eventType: payload.type,
         userId: (payload.data as any)?.id,
         operation: 'event_handling'
@@ -123,6 +127,7 @@ class App {
 
     eventBus.subscribeToEvent('user.deleted', (payload) => {
       logger.info('User deleted event received', {
+        requestId: 'system',
         eventType: payload.type,
         userId: (payload.data as any)?.userId,
         operation: 'event_handling'
@@ -131,6 +136,7 @@ class App {
 
     eventBus.subscribeToEvent('data.fetched', (payload) => {
       logger.info('Data fetched event received', {
+        requestId: 'system',
         eventType: payload.type,
         dataType: (payload.data as any)?.dataType,
         count: (payload.data as any)?.count,
@@ -140,6 +146,7 @@ class App {
 
     eventBus.subscribeToEvent('error.occurred', (payload) => {
       logger.error('Error event received', {
+        requestId: 'system',
         eventType: payload.type,
         error: (payload.data as any)?.message,
         operation: 'event_handling'
@@ -150,6 +157,7 @@ class App {
   public listen(): void {
     this.app.listen(API_CONSTANTS.PORT, () => {
       logger.info(`Server is running on port ${API_CONSTANTS.PORT}`, {
+        requestId: 'system',
         port: API_CONSTANTS.PORT,
         environment: API_CONSTANTS.NODE_ENV,
         operation: 'server_startup'

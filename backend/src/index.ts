@@ -1,12 +1,12 @@
 import App from './app';
 import { logger } from './services/logger';
-import { API_CONSTANTS } from './config/constants';
 
 const app = new App();
 
 // Graceful shutdown handling
 const gracefulShutdown = (signal: string): void => {
   logger.info(`Received ${signal}. Starting graceful shutdown...`, {
+    requestId: 'system',
     signal,
     operation: 'graceful_shutdown'
   });
@@ -17,6 +17,7 @@ const gracefulShutdown = (signal: string): void => {
 // Handle uncaught exceptions
 process.on('uncaughtException', (error: Error) => {
   logger.error('Uncaught Exception', {
+    requestId: 'system',
     error: error.message,
     stack: error.stack,
     operation: 'uncaught_exception'
@@ -28,6 +29,7 @@ process.on('uncaughtException', (error: Error) => {
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
   logger.error('Unhandled Rejection', {
+    requestId: 'system',
     reason: reason instanceof Error ? reason.message : String(reason),
     promise: promise.toString(),
     operation: 'unhandled_rejection'
@@ -45,6 +47,7 @@ try {
   app.listen();
 } catch (error) {
   logger.error('Failed to start server', {
+    requestId: 'system',
     error: error instanceof Error ? error.message : 'Unknown error',
     operation: 'server_startup'
   });

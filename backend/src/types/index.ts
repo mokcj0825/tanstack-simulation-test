@@ -74,7 +74,7 @@ export interface RequestContext {
   timestamp: string;
   method: string;
   path: string;
-  userAgent?: string;
+  userAgent?: string | undefined;
   ip?: string;
 }
 
@@ -83,4 +83,35 @@ export interface LoggerContext {
   userId?: string;
   operation: string;
   duration?: number;
+  [key: string]: any; // Allow additional properties for flexibility
+}
+
+export interface LoginRequest {
+  userName: string;
+  password: string;
+  expectedResult: number;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: {
+    id: string;
+    userName: string;
+    role: string;
+  };
+}
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface JwtPayload {
+  userId: string;
+  userName: string;
+  role: string;
+  type: 'access' | 'refresh';
+  iat: number;
+  exp: number;
 }

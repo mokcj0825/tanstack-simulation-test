@@ -99,7 +99,7 @@ export class ContextMiddleware {
     return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  public static addUserContext(req: Request, res: Response, next: NextFunction): void {
+  public static addUserContext(req: Request, _res: Response, next: NextFunction): void {
     // In a real application, this would extract user info from JWT or session
     const userId = req.headers['x-user-id'] as string;
     
@@ -110,7 +110,7 @@ export class ContextMiddleware {
     next();
   }
 
-  public static addPerformanceHeaders(req: Request, res: Response, next: NextFunction): void {
+  public static addPerformanceHeaders(_req: Request, res: Response, next: NextFunction): void {
     // Add performance monitoring headers
     res.setHeader('X-API-Version', '1.0.0');
     res.setHeader('X-Server-Time', new Date().toISOString());

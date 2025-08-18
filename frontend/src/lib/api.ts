@@ -7,12 +7,18 @@ import {
   UpdateUserRequest, 
   UserStats, 
   PaginationParams,
-  GenerateUsersRequest 
+  GenerateUsersRequest,
+  LoginRequest,
+  LoginResponse,
+  AuthTokens,
+  RefreshTokenRequest,
+  LogoutRequest,
+  ValidateTokenRequest
 } from '../types';
 
 // API constants to avoid magic values
 const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_URL || '/api/v1',
+  BASE_URL: (import.meta as any).env?.VITE_API_URL || '/api',
   TIMEOUT: 10000,
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000
@@ -20,6 +26,8 @@ const API_CONFIG = {
 
 class ApiClient {
   private client: AxiosInstance;
+  private authToken: string | null = null;
+  private pendingRequests: Map<string, Promise<any>> = new Map();
 
   constructor() {
     this.client = axios.create({
@@ -39,6 +47,12 @@ class ApiClient {
       (config) => {
         // Add request ID for tracking
         config.headers['X-Request-ID'] = this.generateRequestId();
+        
+        // Add authorization header if token exists
+        if (this.authToken) {
+          config.headers['Authorization'] = `Bearer ${this.authToken}`;
+        }
+        
         return config;
       },
       (error) => {
@@ -83,39 +97,84 @@ class ApiClient {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  // Auth token management
+  setAuthToken(token: string): void {
+    this.authToken = token;
+  }
+
+  clearAuthToken(): void {
+    this.authToken = null;
+  }
+
+  getAuthToken(): string | null {
+    return this.authToken;
+  }
+
+  // Clear pending requests (useful for cleanup)
+  clearPendingRequests(): void {
+    this.pendingRequests.clear();
+  }
+
   // Users API methods
   async getUsers(params?: PaginationParams): Promise<PaginatedResponse<User>> {
-    const response = await this.client.get<PaginatedResponse<User>>('/users', { params });
+    const response = await this.client.get<PaginatedResponse<User>>('/v1/users', { params });
     return response.data;
   }
 
   async getUserById(id: string): Promise<ApiResponse<User>> {
-    const response = await this.client.get<ApiResponse<User>>(`/users/${id}`);
+    const response = await this.client.get<ApiResponse<User>>(`/v1/users/${id}`);
     return response.data;
   }
 
   async createUser(userData: CreateUserRequest): Promise<ApiResponse<User>> {
-    const response = await this.client.post<ApiResponse<User>>('/users', userData);
+    const response = await this.client.post<ApiResponse<User>>('/v1/users', userData);
     return response.data;
   }
 
   async updateUser(id: string, userData: UpdateUserRequest): Promise<ApiResponse<User>> {
-    const response = await this.client.put<ApiResponse<User>>(`/users/${id}`, userData);
+    const response = await this.client.put<ApiResponse<User>>(`/v1/users/${id}`, userData);
     return response.data;
   }
 
   async deleteUser(id: string): Promise<ApiResponse<void>> {
-    const response = await this.client.delete<ApiResponse<void>>(`/users/${id}`);
+    const response = await this.client.delete<ApiResponse<void>>(`/v1/users/${id}`);
     return response.data;
   }
 
   async generateUsers(request: GenerateUsersRequest): Promise<ApiResponse<User[]>> {
-    const response = await this.client.post<ApiResponse<User[]>>('/users/generate', request);
+    const response = await this.client.post<ApiResponse<User[]>>('/v1/users/generate', request);
     return response.data;
   }
 
   async getUsersStats(): Promise<ApiResponse<UserStats>> {
-    const response = await this.client.get<ApiResponse<UserStats>>('/users/stats');
+    const response = await this.client.get<ApiResponse<UserStats>>('/v1/users/stats');
+    return response.data;
+  }
+
+  // Authentication API methods
+  async login(loginRequest: LoginRequest): Promise<ApiResponse<LoginResponse>> {
+    const response = await this.client.post<ApiResponse<LoginResponse>>('/v1/auth/login', loginRequest);
+    return response.data;
+  }
+
+  async refreshToken(refreshRequest: RefreshTokenRequest): Promise<ApiResponse<AuthTokens>> {
+    const response = await this.client.post<ApiResponse<AuthTokens>>('/v1/auth/refresh', refreshRequest);
+    return response.data;
+  }
+
+  async logout(logoutRequest: LogoutRequest): Promise<ApiResponse<void>> {
+    const response = await this.client.post<ApiResponse<void>>('/v1/auth/logout', logoutRequest);
+    // Clear pending requests on logout
+    this.clearPendingRequests();
+    return response.data;
+  }
+
+  async validateToken(validateRequest: ValidateTokenRequest): Promise<ApiResponse<{ valid: boolean; user: any }>> {
+    const response = await this.client.get<ApiResponse<{ valid: boolean; user: any }>>('/v1/auth/validate', {
+      headers: {
+        'Authorization': `Bearer ${validateRequest.accessToken}`
+      }
+    });
     return response.data;
   }
 

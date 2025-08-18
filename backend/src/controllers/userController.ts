@@ -1,38 +1,41 @@
 import { Request, Response } from 'express';
-import { User, CreateUserRequest, UpdateUserRequest, PaginationParams } from '../types';
+import { User, CreateUserRequest, UpdateUserRequest } from '../types';
 import { ApiResponse, PaginatedResponse } from '../types';
-import { HTTP_STATUS_CODES, ERROR_MESSAGES, PAGINATION_DEFAULTS } from '../config/constants';
+import { HTTP_STATUS_CODES, ERROR_MESSAGES } from '../config/constants';
 import { dummyDataService } from '../data/dummyData';
 import { eventBus } from '../services/eventBus';
 import { logger } from '../services/logger';
 
 export class UserController {
   public static async getUsers(req: Request, res: Response): Promise<void> {
+    const requestId = req.context?.requestId || 'unknown';
+    
     try {
-      const page = parseInt(req.query.page as string) || PAGINATION_DEFAULTS.DEFAULT_PAGE;
-      const pageSize = parseInt(req.query.pageSize as string) || PAGINATION_DEFAULTS.PAGE_SIZE;
-      const search = req.query.search as string;
-      const role = req.query.role as string;
-      const sortBy = req.query.sortBy as string;
-      const sortOrder = req.query.sortOrder as 'asc' | 'desc';
+      const page = parseInt(req.query['page'] as string) || 1;
+      const pageSize = parseInt(req.query['pageSize'] as string) || 10;
+      const search = req.query['search'] as string;
+      const role = req.query['role'] as string;
+      const sortBy = req.query['sortBy'] as string;
+      const sortOrder = (req.query['sortOrder'] as 'asc' | 'desc') || 'asc';
 
       let users: User[];
 
-      // Use switch for non-boolean logic as per user rules
-      switch (true) {
-        case !!search:
-          users = dummyDataService.searchUsers(search);
-          break;
-        case !!role:
-          users = dummyDataService.getUsersByRole(role as any);
-          break;
-        default:
-          users = dummyDataService.getAllUsers();
+      // Get users based on filters
+      if (search) {
+        users = dummyDataService.searchUsers(search);
+      } else if (role) {
+        if (role === 'admin' || role === 'user' || role === 'moderator') {
+          users = dummyDataService.getUsersByRole(role);
+        } else {
+          users = [];
+        }
+      } else {
+        users = dummyDataService.getAllUsers();
       }
 
       // Apply sorting
       if (sortBy) {
-        users = this.sortUsers(users, sortBy, sortOrder);
+        users = UserController.sortUsers(users, sortBy, sortOrder);
       }
 
       // Apply pagination
@@ -46,7 +49,7 @@ export class UserController {
         success: true,
         data: paginatedUsers,
         timestamp: new Date().toISOString(),
-        requestId: req.context.requestId,
+        requestId,
         pagination: {
           page,
           pageSize,
@@ -57,13 +60,10 @@ export class UserController {
         }
       };
 
-      // Emit data fetched event
-      eventBus.emitDataFetched('users', paginatedUsers.length, req.context);
-
       res.status(HTTP_STATUS_CODES.OK).json(response);
     } catch (error) {
       logger.error('Failed to get users', {
-        requestId: req.context.requestId,
+        requestId,
         error: error instanceof Error ? error.message : 'Unknown error',
         operation: 'get_users'
       });
@@ -72,7 +72,7 @@ export class UserController {
         success: false,
         error: ERROR_MESSAGES.INTERNAL_ERROR,
         timestamp: new Date().toISOString(),
-        requestId: req.context.requestId
+        requestId
       };
 
       res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json(response);
@@ -82,6 +82,16 @@ export class UserController {
   public static async getUserById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      if (!id) {
+        const response: ApiResponse = {
+          success: false,
+          error: ERROR_MESSAGES.BAD_REQUEST,
+          timestamp: new Date().toISOString(),
+          requestId: req.context.requestId
+        };
+        res.status(HTTP_STATUS_CODES.BAD_REQUEST).json(response);
+        return;
+      }
       const user = dummyDataService.getUserById(id);
 
       if (!user) {
@@ -110,7 +120,7 @@ export class UserController {
     } catch (error) {
       logger.error('Failed to get user by ID', {
         requestId: req.context.requestId,
-        userId: req.params.id,
+        userId: req.params['id'] || 'unknown',
         error: error instanceof Error ? error.message : 'Unknown error',
         operation: 'get_user_by_id'
       });
@@ -164,6 +174,16 @@ export class UserController {
   public static async updateUser(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      if (!id) {
+        const response: ApiResponse = {
+          success: false,
+          error: ERROR_MESSAGES.BAD_REQUEST,
+          timestamp: new Date().toISOString(),
+          requestId: req.context.requestId
+        };
+        res.status(HTTP_STATUS_CODES.BAD_REQUEST).json(response);
+        return;
+      }
       const updateData: UpdateUserRequest = req.body;
       
       const updatedUser = dummyDataService.updateUser(id, updateData);
@@ -195,7 +215,7 @@ export class UserController {
     } catch (error) {
       logger.error('Failed to update user', {
         requestId: req.context.requestId,
-        userId: req.params.id,
+        userId: req.params['id'] || 'unknown',
         error: error instanceof Error ? error.message : 'Unknown error',
         operation: 'update_user'
       });
@@ -214,6 +234,16 @@ export class UserController {
   public static async deleteUser(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      if (!id) {
+        const response: ApiResponse = {
+          success: false,
+          error: ERROR_MESSAGES.BAD_REQUEST,
+          timestamp: new Date().toISOString(),
+          requestId: req.context.requestId
+        };
+        res.status(HTTP_STATUS_CODES.BAD_REQUEST).json(response);
+        return;
+      }
       const deleted = dummyDataService.deleteUser(id);
 
       if (!deleted) {
@@ -242,7 +272,7 @@ export class UserController {
     } catch (error) {
       logger.error('Failed to delete user', {
         requestId: req.context.requestId,
-        userId: req.params.id,
+        userId: req.params['id'] || 'unknown',
         error: error instanceof Error ? error.message : 'Unknown error',
         operation: 'delete_user'
       });
@@ -339,31 +369,23 @@ export class UserController {
 
   private static sortUsers(users: User[], sortBy: string, sortOrder: 'asc' | 'desc' = 'asc'): User[] {
     return [...users].sort((a, b) => {
-      let aValue: string | number;
-      let bValue: string | number;
-
-      switch (sortBy) {
-        case 'name':
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
-          break;
-        case 'email':
-          aValue = a.email.toLowerCase();
-          bValue = b.email.toLowerCase();
-          break;
-        case 'role':
-          aValue = a.role.toLowerCase();
-          bValue = b.role.toLowerCase();
-          break;
-        case 'createdAt':
-          aValue = new Date(a.createdAt).getTime();
-          bValue = new Date(b.createdAt).getTime();
-          break;
-        default:
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
+      let aValue: string;
+      let bValue: string;
+      
+      if (sortBy.toLowerCase() === 'name') {
+        aValue = a.name.toLowerCase();
+        bValue = b.name.toLowerCase();
+      } else if (sortBy.toLowerCase() === 'email') {
+        aValue = a.email.toLowerCase();
+        bValue = b.email.toLowerCase();
+      } else if (sortBy.toLowerCase() === 'role') {
+        aValue = a.role.toLowerCase();
+        bValue = b.role.toLowerCase();
+      } else {
+        aValue = a.name.toLowerCase();
+        bValue = b.name.toLowerCase();
       }
-
+      
       if (aValue < bValue) {
         return sortOrder === 'asc' ? -1 : 1;
       }

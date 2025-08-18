@@ -27,6 +27,7 @@ class EventBusService extends EventEmitter2 {
   private setupGlobalListeners(): void {
     this.on('**', (event: string, payload: EventPayload) => {
       logger.info('Event emitted', {
+        requestId: 'system',
         event,
         payload,
         operation: 'event_emission'
@@ -35,6 +36,7 @@ class EventBusService extends EventEmitter2 {
 
     this.on('error', (error: Error) => {
       logger.error('Event bus error', {
+        requestId: 'system',
         error: error.message,
         stack: error.stack,
         operation: 'event_bus_error'

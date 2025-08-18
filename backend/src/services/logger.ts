@@ -56,14 +56,14 @@ class LoggerService {
     };
 
     if (context) {
-      baseMeta.requestId = context.requestId;
-      baseMeta.operation = context.operation;
-      if (context.userId) {
-        baseMeta.userId = context.userId;
-      }
-      if (context.duration) {
-        baseMeta.duration = context.duration;
-      }
+      baseMeta['requestId'] = context['requestId'];
+      baseMeta['operation'] = context['operation'];
+              if (context['userId']) {
+          baseMeta['userId'] = context['userId'];
+        }
+        if (context['duration']) {
+          baseMeta['duration'] = context['duration'];
+        }
     }
 
     return { ...baseMeta, ...additionalMeta };
@@ -97,16 +97,24 @@ class LoggerService {
   } {
     return {
       info: (message: string, operation: string, meta?: Record<string, unknown>) => {
-        this.info(message, { requestId, userId, operation }, meta);
+        const context: LoggerContext = { requestId, operation };
+        if (userId) context.userId = userId;
+        this.info(message, context, meta);
       },
       error: (message: string, operation: string, meta?: Record<string, unknown>) => {
-        this.error(message, { requestId, userId, operation }, meta);
+        const context: LoggerContext = { requestId, operation };
+        if (userId) context.userId = userId;
+        this.error(message, context, meta);
       },
       warn: (message: string, operation: string, meta?: Record<string, unknown>) => {
-        this.warn(message, { requestId, userId, operation }, meta);
+        const context: LoggerContext = { requestId, operation };
+        if (userId) context.userId = userId;
+        this.warn(message, context, meta);
       },
       debug: (message: string, operation: string, meta?: Record<string, unknown>) => {
-        this.debug(message, { requestId, userId, operation }, meta);
+        const context: LoggerContext = { requestId, operation };
+        if (userId) context.userId = userId;
+        this.debug(message, context, meta);
       }
     };
   }

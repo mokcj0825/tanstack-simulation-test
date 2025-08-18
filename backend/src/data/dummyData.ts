@@ -1,5 +1,5 @@
 import { User, UserRole } from '../types';
-import { PAGINATION_DEFAULTS } from '../config/constants';
+
 
 class DummyDataService {
   private users: User[] = [];
@@ -82,13 +82,22 @@ class DummyDataService {
       return undefined;
     }
 
-    this.users[userIndex] = {
-      ...this.users[userIndex],
-      ...updateData,
+    const existingUser = this.users[userIndex];
+    if (!existingUser) {
+      return undefined;
+    }
+
+    const updatedUser: User = {
+      id: existingUser.id,
+      name: updateData.name ?? existingUser.name,
+      email: updateData.email ?? existingUser.email,
+      role: updateData.role ?? existingUser.role,
+      createdAt: existingUser.createdAt,
       updatedAt: new Date().toISOString()
     };
+    this.users[userIndex] = updatedUser;
 
-    return this.users[userIndex];
+    return updatedUser;
   }
 
   public deleteUser(id: string): boolean {
@@ -137,9 +146,9 @@ class DummyDataService {
     const startId = this.users.length + 1;
 
     for (let i = 0; i < count; i++) {
-      const randomName = names[Math.floor(Math.random() * names.length)];
-      const randomDomain = domains[Math.floor(Math.random() * domains.length)];
-      const randomRole = this.userRoles[Math.floor(Math.random() * this.userRoles.length)];
+      const randomName = names[Math.floor(Math.random() * names.length)] || 'Unknown User';
+      const randomDomain = domains[Math.floor(Math.random() * domains.length)] || 'example.com';
+      const randomRole = this.userRoles[Math.floor(Math.random() * this.userRoles.length)] || 'user';
       
       const newUser: User = {
         id: `user_${startId + i}`,

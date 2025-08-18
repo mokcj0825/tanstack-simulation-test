@@ -1,10 +1,13 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { UserList } from './components/UserList';
 import { StatsCard } from './components/StatsCard';
+import { AuthTestField } from './components/AuthTestField';
+import { UserListPage } from './pages/UserListPage';
 import { useUserStats } from './hooks/useUsers';
-import { Activity, Database, Zap } from 'lucide-react';
+import { Activity, Database, Zap, Users, Shield } from 'lucide-react';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -24,57 +27,86 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center space-x-3">
-                <div className="flex items-center space-x-2">
-                  <Database size={24} className="text-primary-600" />
-                  <h1 className="text-xl font-bold text-gray-900">User Management System</h1>
+      <Router>
+        <div className="min-h-screen bg-gray-50">
+          {/* Header */}
+          <header className="bg-white shadow-sm border-b border-gray-200">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between h-16">
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2">
+                    <Database size={24} className="text-primary-600" />
+                    <h1 className="text-xl font-bold text-gray-900">User Management System</h1>
+                  </div>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <Zap size={12} className="mr-1" />
+                    Event-Driven
+                  </span>
                 </div>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  <Zap size={12} className="mr-1" />
-                  Event-Driven
-                </span>
-              </div>
-              
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-sm text-gray-500">
-                  <Activity size={16} />
-                  <span>Scalable Architecture</span>
-                </div>
+                
+                <nav className="flex items-center space-x-4">
+                  <Link
+                    to="/"
+                    className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100"
+                  >
+                    <Shield size={16} />
+                    <span>Auth Test</span>
+                  </Link>
+                  <Link
+                    to="/user-list"
+                    className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100"
+                  >
+                    <Users size={16} />
+                    <span>User List</span>
+                  </Link>
+                  <div className="flex items-center space-x-2 text-sm text-gray-500">
+                    <Activity size={16} />
+                    <span>Scalable Architecture</span>
+                  </div>
+                </nav>
               </div>
             </div>
-          </div>
-        </header>
+          </header>
 
-        {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="space-y-8">
-            {/* Stats Section */}
-            <StatsSection />
-            
-            {/* Users Section */}
-            <UserList />
-          </div>
-        </main>
+          {/* Main Content */}
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/user-list" element={<UserListPage />} />
+            </Routes>
+          </main>
 
-        {/* Footer */}
-        <footer className="bg-white border-t border-gray-200 mt-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="text-center text-sm text-gray-500">
-              <p>Built with React, TypeScript, TanStack Query, and Express</p>
-              <p className="mt-1">Event-driven architecture with scalable design patterns</p>
+          {/* Footer */}
+          <footer className="bg-white border-t border-gray-200 mt-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <div className="text-center text-sm text-gray-500">
+                <p>Built with React, TypeScript, TanStack Query, and Express</p>
+                <p className="mt-1">Event-driven architecture with scalable design patterns</p>
+              </div>
             </div>
-          </div>
-        </footer>
-      </div>
-      
-      {/* React Query DevTools */}
-      <ReactQueryDevtools initialIsOpen={false} />
+          </footer>
+        </div>
+        
+        {/* React Query DevTools */}
+        <ReactQueryDevtools initialIsOpen={false} />
+      </Router>
     </QueryClientProvider>
+  );
+}
+
+// Home Page Component
+function HomePage() {
+  return (
+    <div className="space-y-8">
+      {/* Authentication Test Field */}
+      <AuthTestField />
+      
+      {/* Stats Section */}
+      <StatsSection />
+      
+      {/* Users Section */}
+      <UserList />
+    </div>
   );
 }
 

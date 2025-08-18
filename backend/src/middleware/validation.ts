@@ -76,6 +76,7 @@ export class ValidationMiddleware {
         error.details = validationErrors;
         
         logger.error('Validation failed', {
+          requestId: 'system',
           route,
           errors: validationErrors,
           operation: 'validation'

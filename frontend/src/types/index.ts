@@ -62,3 +62,46 @@ export interface PaginationParams {
 export interface GenerateUsersRequest {
   count: number;
 }
+
+// Authentication types
+export interface LoginRequest {
+  userName: string;
+  password: string;
+  expectedResult: number;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: {
+    id: string;
+    userName: string;
+    role: string;
+  };
+}
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface JwtPayload {
+  userId: string;
+  userName: string;
+  role: string;
+  type: 'access' | 'refresh';
+  iat: number;
+  exp: number;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface LogoutRequest {
+  refreshToken: string;
+}
+
+export interface ValidateTokenRequest {
+  accessToken: string;
+}
