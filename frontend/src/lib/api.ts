@@ -13,7 +13,9 @@ import {
   AuthTokens,
   RefreshTokenRequest,
   LogoutRequest,
-  ValidateTokenRequest
+  ValidateTokenRequest,
+  UpdateProfileRequest,
+  UpdateProfileResponse
 } from '../types';
 
 // API constants to avoid magic values
@@ -181,6 +183,30 @@ class ApiClient {
   // Health check
   async healthCheck(): Promise<{ status: string; timestamp: string; uptime: number; environment: string; version: string }> {
     const response = await this.client.get('/health');
+    return response.data;
+  }
+
+  // Profile API methods
+  async updateProfile(profileData: UpdateProfileRequest): Promise<ApiResponse<UpdateProfileResponse>> {
+    const response = await this.client.post<ApiResponse<UpdateProfileResponse>>('/v1/users/updateProfile', profileData);
+    return response.data;
+  }
+
+  // Generic request method
+  async request<T = any>(config: {
+    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+    url: string;
+    data?: any;
+    params?: any;
+    headers?: any;
+  }): Promise<T> {
+    const response = await this.client.request<T>({
+      method: config.method,
+      url: config.url,
+      data: config.data,
+      params: config.params,
+      headers: config.headers,
+    });
     return response.data;
   }
 }

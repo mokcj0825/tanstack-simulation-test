@@ -1,10 +1,12 @@
-import React from 'react';
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { UserList } from './components/UserList';
 import { StatsCard } from './components/StatsCard';
 import { AuthTestField } from './components/AuthTestField';
+import { ProfileTestField } from './components/ProfileTestField';
+import { PostTestField } from './components/PostTestField';
 import { UserListPage } from './pages/UserListPage';
 import { useUserStats } from './hooks/useUsers';
 import { Activity, Database, Zap, Users, Shield } from 'lucide-react';
@@ -98,8 +100,14 @@ function App() {
 function HomePage() {
   return (
     <div className="space-y-8">
+      {/* Generic POST Hook Test Field */}
+      <PostTestField />
+      
       {/* Authentication Test Field */}
       <AuthTestField />
+      
+      {/* Profile Test Field */}
+      <ProfileTestField />
       
       {/* Stats Section */}
       <StatsSection />

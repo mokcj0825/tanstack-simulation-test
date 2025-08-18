@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { User, CreateUserRequest, UpdateUserRequest } from '../types';
+import { User, CreateUserRequest, UpdateUserRequest, UpdateProfileRequest, UpdateProfileResponse } from '../types';
 import { ApiResponse, PaginatedResponse } from '../types';
 import { HTTP_STATUS_CODES, ERROR_MESSAGES } from '../config/constants';
 import { dummyDataService } from '../data/dummyData';
@@ -394,5 +394,55 @@ export class UserController {
       }
       return 0;
     });
+  }
+
+  public static async updateProfile(req: Request, res: Response): Promise<void> {
+    try {
+      const requestData: UpdateProfileRequest = req.body;
+      
+      // Transform the request data according to the specified mapping
+      const responseData: UpdateProfileResponse = {
+        response: requestData.placeHolder,
+        dataList: requestData.dummyData,
+        amount: requestData.numericValue,
+        tooltip: {
+          header: requestData.objectValue.firstString,
+          footer: requestData.objectValue.secondString
+        }
+      };
+
+      const response: ApiResponse<UpdateProfileResponse> = {
+        success: true,
+        data: responseData,
+        timestamp: new Date().toISOString(),
+        requestId: req.context.requestId
+      };
+
+      // Emit profile update event
+      eventBus.emit('profile:updated', {
+        type: 'profile:updated',
+        data: responseData,
+        timestamp: new Date().toISOString(),
+        source: 'user_controller',
+        correlationId: req.context.requestId
+      });
+
+      res.status(HTTP_STATUS_CODES.OK).json(response);
+    } catch (error) {
+      logger.error('Failed to update profile', {
+        requestId: req.context.requestId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        operation: 'update_profile'
+      });
+
+      const response: ApiResponse = {
+        success: false,
+        error: ERROR_MESSAGES.INTERNAL_ERROR,
+        timestamp: new Date().toISOString(),
+        requestId: req.context.requestId
+      };
+
+      res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json(response);
+    }
   }
 }

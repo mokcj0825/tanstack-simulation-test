@@ -11,6 +11,7 @@ ValidationMiddleware.registerSchema('POST /users', ValidationMiddleware.createUs
 ValidationMiddleware.registerSchema('PUT /users/:id', ValidationMiddleware.updateUserSchema());
 ValidationMiddleware.registerSchema('DELETE /users/:id', ValidationMiddleware.deleteUserSchema());
 ValidationMiddleware.registerSchema('POST /users/generate', ValidationMiddleware.generateUsersSchema());
+ValidationMiddleware.registerSchema('POST /users/updateProfile', ValidationMiddleware.updateProfileSchema());
 
 // User routes
 router.get('/', ValidationMiddleware.validate('GET /users'), UserController.getUsers);
@@ -20,5 +21,6 @@ router.post('/', ValidationMiddleware.validate('POST /users'), UserController.cr
 router.put('/:id', ValidationMiddleware.validate('PUT /users/:id'), UserController.updateUser);
 router.delete('/:id', ValidationMiddleware.validate('DELETE /users/:id'), UserController.deleteUser);
 router.post('/generate', ValidationMiddleware.validate('POST /users/generate'), UserController.generateUsers);
+router.post('/updateProfile', ValidationMiddleware.validate('POST /users/updateProfile'), UserController.updateProfile);
 
 export default router;

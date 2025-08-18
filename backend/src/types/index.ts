@@ -115,3 +115,23 @@ export interface JwtPayload {
   iat: number;
   exp: number;
 }
+
+export interface UpdateProfileRequest {
+  placeHolder: string;
+  dummyData: string[];
+  numericValue: number;
+  objectValue: {
+    firstString: string;
+    secondString: string;
+  };
+}
+
+export interface UpdateProfileResponse {
+  response: string;
+  dataList: string[];
+  amount: number;
+  tooltip: {
+    header: string;
+    footer: string;
+  };
+}

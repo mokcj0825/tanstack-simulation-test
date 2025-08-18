@@ -155,4 +155,18 @@ export class ValidationMiddleware {
       })
     };
   }
+
+  public static updateProfileSchema(): ValidationSchema {
+    return {
+      body: Joi.object({
+        placeHolder: Joi.string().required(),
+        dummyData: Joi.array().items(Joi.string()).required(),
+        numericValue: Joi.number().required(),
+        objectValue: Joi.object({
+          firstString: Joi.string().required(),
+          secondString: Joi.string().required()
+        }).required()
+      })
+    };
+  }
 }
