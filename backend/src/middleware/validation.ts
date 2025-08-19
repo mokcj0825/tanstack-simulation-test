@@ -169,4 +169,16 @@ export class ValidationMiddleware {
       })
     };
   }
+
+  public static getBookListSchema(): ValidationSchema {
+    return {
+      query: Joi.object({
+        page: Joi.number().integer().min(1).optional(),
+        pageSize: Joi.number().integer().min(1).max(100).optional(),
+        searchKey: Joi.string().min(1).optional(),
+        sortBy: Joi.string().valid('bookName', 'author', 'price', 'stock', 'category', 'isbn').optional(),
+        sortOrder: Joi.string().valid('asc', 'desc').optional()
+      })
+    };
+  }
 }

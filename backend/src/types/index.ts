@@ -135,3 +135,35 @@ export interface UpdateProfileResponse {
     footer: string;
   };
 }
+
+export interface Book {
+  id: string;
+  bookName: {
+    my: string;
+    en: string;
+    zh: string;
+  };
+  isbn: string;
+  author: string;
+  authorDescription: {
+    my: string;
+    en: string;
+    zh: string;
+  };
+  bookDescription: {
+    my: string;
+    en: string;
+    zh: string;
+  };
+  price: number;
+  stock: number;
+  category: string;
+}
+
+export interface BookListParams {
+  page?: number;
+  pageSize?: number;
+  searchKey?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}

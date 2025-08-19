@@ -7,9 +7,12 @@ import { StatsCard } from './components/StatsCard';
 import { AuthTestField } from './components/AuthTestField';
 import { ProfileTestField } from './components/ProfileTestField';
 import { PostTestField } from './components/PostTestField';
+import { GetTestField } from './components/GetTestField';
 import { UserListPage } from './pages/UserListPage';
+import { BookListPage } from './pages/BookListPage';
+import { GetTestPage } from './pages/GetTestPage';
 import { useUserStats } from './hooks/useUsers';
-import { Activity, Database, Zap, Users, Shield } from 'lucide-react';
+import { Activity, Database, Zap, Users, Shield, BookOpen } from 'lucide-react';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -61,6 +64,20 @@ function App() {
                     <Users size={16} />
                     <span>User List</span>
                   </Link>
+                  <Link
+                    to="/book-list"
+                    className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100"
+                  >
+                    <BookOpen size={16} />
+                    <span>Book List</span>
+                  </Link>
+                  <Link
+                    to="/get-test"
+                    className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100"
+                  >
+                    <Database size={16} />
+                    <span>GET Test</span>
+                  </Link>
                   <div className="flex items-center space-x-2 text-sm text-gray-500">
                     <Activity size={16} />
                     <span>Scalable Architecture</span>
@@ -75,6 +92,8 @@ function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/user-list" element={<UserListPage />} />
+              <Route path="/book-list" element={<BookListPage />} />
+              <Route path="/get-test" element={<GetTestPage />} />
             </Routes>
           </main>
 
@@ -100,6 +119,9 @@ function App() {
 function HomePage() {
   return (
     <div className="space-y-8">
+      {/* Generic GET Hook Test Field */}
+      <GetTestField />
+      
       {/* Generic POST Hook Test Field */}
       <PostTestField />
       

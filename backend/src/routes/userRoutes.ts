@@ -12,10 +12,12 @@ ValidationMiddleware.registerSchema('PUT /users/:id', ValidationMiddleware.updat
 ValidationMiddleware.registerSchema('DELETE /users/:id', ValidationMiddleware.deleteUserSchema());
 ValidationMiddleware.registerSchema('POST /users/generate', ValidationMiddleware.generateUsersSchema());
 ValidationMiddleware.registerSchema('POST /users/updateProfile', ValidationMiddleware.updateProfileSchema());
+ValidationMiddleware.registerSchema('GET /users/bookList', ValidationMiddleware.getBookListSchema());
 
 // User routes
 router.get('/', ValidationMiddleware.validate('GET /users'), UserController.getUsers);
 router.get('/stats', UserController.getUsersStats);
+router.get('/bookList', ValidationMiddleware.validate('GET /users/bookList'), UserController.getBookList);
 router.get('/:id', ValidationMiddleware.validate('GET /users/:id'), UserController.getUserById);
 router.post('/', ValidationMiddleware.validate('POST /users'), UserController.createUser);
 router.put('/:id', ValidationMiddleware.validate('PUT /users/:id'), UserController.updateUser);

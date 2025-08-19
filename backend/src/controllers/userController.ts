@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { User, CreateUserRequest, UpdateUserRequest, UpdateProfileRequest, UpdateProfileResponse } from '../types';
+import { User, CreateUserRequest, UpdateUserRequest, UpdateProfileRequest, UpdateProfileResponse, Book } from '../types';
 import { ApiResponse, PaginatedResponse } from '../types';
 import { HTTP_STATUS_CODES, ERROR_MESSAGES } from '../config/constants';
 import { dummyDataService } from '../data/dummyData';
@@ -444,5 +444,219 @@ export class UserController {
 
       res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json(response);
     }
+  }
+
+  public static async getBookList(req: Request, res: Response): Promise<void> {
+    const requestId = req.context?.requestId || 'unknown';
+    
+    try {
+      const page = parseInt(req.query['page'] as string) || 1;
+      const pageSize = parseInt(req.query['pageSize'] as string) || 10;
+      const searchKey = req.query['searchKey'] as string;
+      const sortBy = req.query['sortBy'] as string;
+      const sortOrder = (req.query['sortOrder'] as 'asc' | 'desc') || 'asc';
+
+      // Generate dummy book data
+      const dummyBooks: Book[] = [
+        {
+          id: 'book-001',
+          bookName: { my: 'အင်္ဂလိပ်စာ သင်ခန်းစာ', en: 'English Learning Guide', zh: '英语学习指南' },
+          isbn: '978-0-123456-47-2',
+          author: 'John Smith',
+          authorDescription: { 
+            my: 'အင်္ဂလိပ်စာ ပညာရှင်', 
+            en: 'English Language Expert', 
+            zh: '英语语言专家' 
+          },
+          bookDescription: { 
+            my: 'အင်္ဂလိပ်စာ သင်ယူရန် လမ်းညွှန်ချက်', 
+            en: 'Comprehensive guide for learning English', 
+            zh: '英语学习综合指南' 
+          },
+          price: 29.99,
+          stock: 50,
+          category: 'Education'
+        },
+        {
+          id: 'book-002',
+          bookName: { my: 'ပရိုဂရမ်မင်း အနုပညာ', en: 'The Art of Programming', zh: '编程艺术' },
+          isbn: '978-0-987654-32-1',
+          author: 'Jane Doe',
+          authorDescription: { 
+            my: 'ဆော့ဖ်ဝဲ အင်ဂျင်နီယာ', 
+            en: 'Software Engineer', 
+            zh: '软件工程师' 
+          },
+          bookDescription: { 
+            my: 'ပရိုဂရမ်မင်း နည်းပညာ လမ်းညွှန်', 
+            en: 'Advanced programming techniques and best practices', 
+            zh: '高级编程技术和最佳实践' 
+          },
+          price: 49.99,
+          stock: 25,
+          category: 'Technology'
+        },
+        {
+          id: 'book-003',
+          bookName: { my: 'စီးပွားရေး စီမံခန့်ခွဲမှု', en: 'Business Management', zh: '商业管理' },
+          isbn: '978-0-555555-55-5',
+          author: 'Robert Johnson',
+          authorDescription: { 
+            my: 'စီးပွားရေး အတိုင်ပင်ခံ', 
+            en: 'Business Consultant', 
+            zh: '商业顾问' 
+          },
+          bookDescription: { 
+            my: 'စီးပွားရေး စီမံခန့်ခွဲမှု နည်းလမ်းများ', 
+            en: 'Modern business management strategies', 
+            zh: '现代商业管理策略' 
+          },
+          price: 39.99,
+          stock: 30,
+          category: 'Business'
+        },
+        {
+          id: 'book-004',
+          bookName: { my: 'သိပ္ပံ နည်းပညာ', en: 'Science & Technology', zh: '科学技术' },
+          isbn: '978-0-777777-77-7',
+          author: 'Dr. Emily Chen',
+          authorDescription: { 
+            my: 'သိပ္ပံပညာရှင်', 
+            en: 'Research Scientist', 
+            zh: '研究科学家' 
+          },
+          bookDescription: { 
+            my: 'ခေတ်မီ သိပ္ပံ နည်းပညာ ဖွံ့ဖြိုးမှု', 
+            en: 'Latest developments in science and technology', 
+            zh: '科学技术最新发展' 
+          },
+          price: 59.99,
+          stock: 15,
+          category: 'Science'
+        },
+        {
+          id: 'book-005',
+          bookName: { my: 'စာပေ သမိုင်း', en: 'Literary History', zh: '文学史' },
+          isbn: '978-0-999999-99-9',
+          author: 'Prof. Michael Brown',
+          authorDescription: { 
+            my: 'စာပေ ပညာရှင်', 
+            en: 'Literature Professor', 
+            zh: '文学教授' 
+          },
+          bookDescription: { 
+            my: 'ကမ္ဘာ့ စာပေ သမိုင်း လေ့လာချက်', 
+            en: 'Comprehensive study of world literature', 
+            zh: '世界文学综合研究' 
+          },
+          price: 34.99,
+          stock: 40,
+          category: 'Literature'
+        }
+      ];
+
+      let books: Book[] = [...dummyBooks];
+
+      // Apply search filter if searchKey is provided
+      if (searchKey) {
+        books = books.filter(book => 
+          book.bookName.en.toLowerCase().includes(searchKey.toLowerCase()) ||
+          book.bookName.my.toLowerCase().includes(searchKey.toLowerCase()) ||
+          book.bookName.zh.toLowerCase().includes(searchKey.toLowerCase()) ||
+          book.author.toLowerCase().includes(searchKey.toLowerCase()) ||
+          book.isbn.toLowerCase().includes(searchKey.toLowerCase()) ||
+          book.category.toLowerCase().includes(searchKey.toLowerCase())
+        );
+      }
+
+      // Apply sorting if sortBy is provided
+      if (sortBy) {
+        books = UserController.sortBooks(books, sortBy, sortOrder);
+      }
+
+      // Apply pagination
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedBooks = books.slice(startIndex, endIndex);
+      const total = books.length;
+      const totalPages = Math.ceil(total / pageSize);
+
+      const response: PaginatedResponse<Book> = {
+        success: true,
+        data: paginatedBooks,
+        timestamp: new Date().toISOString(),
+        requestId,
+        pagination: {
+          page,
+          pageSize,
+          total,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1
+        }
+      };
+
+      res.status(HTTP_STATUS_CODES.OK).json(response);
+    } catch (error) {
+      logger.error('Failed to get book list', {
+        requestId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        operation: 'get_book_list'
+      });
+
+      const response: ApiResponse = {
+        success: false,
+        error: ERROR_MESSAGES.INTERNAL_ERROR,
+        timestamp: new Date().toISOString(),
+        requestId
+      };
+
+      res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json(response);
+    }
+  }
+
+  private static sortBooks(books: Book[], sortBy: string, sortOrder: 'asc' | 'desc' = 'asc'): Book[] {
+    return [...books].sort((a, b) => {
+      let aValue: string | number;
+      let bValue: string | number;
+      
+      switch (sortBy.toLowerCase()) {
+        case 'bookname':
+          aValue = a.bookName.en.toLowerCase();
+          bValue = b.bookName.en.toLowerCase();
+          break;
+        case 'author':
+          aValue = a.author.toLowerCase();
+          bValue = b.author.toLowerCase();
+          break;
+        case 'price':
+          aValue = a.price;
+          bValue = b.price;
+          break;
+        case 'stock':
+          aValue = a.stock;
+          bValue = b.stock;
+          break;
+        case 'category':
+          aValue = a.category.toLowerCase();
+          bValue = b.category.toLowerCase();
+          break;
+        case 'isbn':
+          aValue = a.isbn.toLowerCase();
+          bValue = b.isbn.toLowerCase();
+          break;
+        default:
+          aValue = a.bookName.en.toLowerCase();
+          bValue = b.bookName.en.toLowerCase();
+      }
+      
+      if (aValue < bValue) {
+        return sortOrder === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortOrder === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
   }
 }

@@ -16,6 +16,9 @@ const gracefulShutdown = (signal: string): void => {
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error: Error) => {
+  console.error('Uncaught Exception:', error.message);
+  console.error('Stack trace:', error.stack);
+  
   logger.error('Uncaught Exception', {
     requestId: 'system',
     error: error.message,
@@ -28,6 +31,9 @@ process.on('uncaughtException', (error: Error) => {
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
+  console.error('Unhandled Rejection:', reason);
+  console.error('Promise:', promise);
+  
   logger.error('Unhandled Rejection', {
     requestId: 'system',
     reason: reason instanceof Error ? reason.message : String(reason),

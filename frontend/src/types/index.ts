@@ -54,7 +54,7 @@ export interface PaginationParams {
   page?: number;
   pageSize?: number;
   search?: string;
-  role?: UserRole;
+  role?: UserRole | undefined;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
@@ -124,4 +124,36 @@ export interface UpdateProfileResponse {
     header: string;
     footer: string;
   };
+}
+
+export interface Book {
+  id: string;
+  bookName: {
+    my: string;
+    en: string;
+    zh: string;
+  };
+  isbn: string;
+  author: string;
+  authorDescription: {
+    my: string;
+    en: string;
+    zh: string;
+  };
+  bookDescription: {
+    my: string;
+    en: string;
+    zh: string;
+  };
+  price: number;
+  stock: number;
+  category: string;
+}
+
+export interface BookListParams {
+  page?: number;
+  pageSize?: number;
+  searchKey?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }

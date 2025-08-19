@@ -15,7 +15,9 @@ import {
   LogoutRequest,
   ValidateTokenRequest,
   UpdateProfileRequest,
-  UpdateProfileResponse
+  UpdateProfileResponse,
+  Book,
+  BookListParams
 } from '../types';
 
 // API constants to avoid magic values
@@ -189,6 +191,12 @@ class ApiClient {
   // Profile API methods
   async updateProfile(profileData: UpdateProfileRequest): Promise<ApiResponse<UpdateProfileResponse>> {
     const response = await this.client.post<ApiResponse<UpdateProfileResponse>>('/v1/users/updateProfile', profileData);
+    return response.data;
+  }
+
+  // Book API methods
+  async getBookList(params?: BookListParams): Promise<PaginatedResponse<Book>> {
+    const response = await this.client.get<PaginatedResponse<Book>>('/v1/users/bookList', { params });
     return response.data;
   }
 
